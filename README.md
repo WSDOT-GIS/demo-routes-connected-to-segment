@@ -1,21 +1,4 @@
-# Template: Single page mapping application using ArcGIS API for JavaScript
+# Demo: Select routes connected to mainline segment
 
-This is a starter application for creating a single page map application using the ArcGIS API for JavaScript, which is built using Webpack and TypeScript.
+Demonstrates how to find the routes that connect to the mainline between two SRMPs.
 
-## Use
-
-## Create new repo on GitHub
-
-[Click here](https://github.com/WSDOT-GIS/arcgis-2d-spa-template/generate) and fill in the information for your new application.
-
-More information about templates can be found in this [GitHub blog: Generate new repositories with repository templates](https://github.blog/2019-06-06-generate-new-repositories-with-repository-templates/)
-
-## Custom (not hosted on GitHub)
-
-1. Clone this repository to your computer's hard drive.
-2. Remove the remote repository
-    ```cmd
-    git remote remove origin
-    ```
-3. Update the information in the `package.json` file with your own project's information.
-4. Add your remote using the `git remote` command.
