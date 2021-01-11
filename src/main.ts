@@ -2,8 +2,8 @@ import Extent from "esri/geometry/Extent";
 import EsriMap from "esri/Map";
 import MapView from "esri/views/MapView";
 import Search from "esri/widgets/Search";
-import { RouteLocator, Route } from "wsdot-elc";
-import { createRouteControl, IRouteSegment } from "./RouteControl";
+import { RouteLocator } from "wsdot-elc";
+import { createRouteControl, IRouteSegment, getRoutesConnectedToRouteSegment } from "./RouteControl";
 
 const map = new EsriMap({
   basemap: "topo-vector"
@@ -53,8 +53,12 @@ const routeLocator = new RouteLocator();
 routeLocator.getRouteList(true).then(routes => {
   console.group("Get Route List");
   console.debug("routes", routes);
-  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-  const currentRoutes = routes!.Current;
+  
+  if (routes === null) {
+    throw new Error("null routes")
+  }
+
+  const currentRoutes = routes.Current;
   console.debug("current routes", currentRoutes);
 
   const routeControl = createRouteControl(currentRoutes);
@@ -62,11 +66,21 @@ routeLocator.getRouteList(true).then(routes => {
   view.ui.add(routeControl, "top-right");
   
   console.groupEnd();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   routeControl.addEventListener("route-selected", (evt: any) => {
     const customEvent = evt as CustomEvent<IRouteSegment>
-    const {route, beginSrmp, endSrmp} = evt.detail;
+    const routeSegment = customEvent.detail;
+    const {route, beginSrmp, endSrmp} = routeSegment;
     console.debug(`Selected route is ${route.name} @ ${beginSrmp} - ${endSrmp}`, customEvent);
-  })
+
+    const connectedRoutes = getRoutesConnectedToRouteSegment(routeSegment, currentRoutes);
+
+    console.debug("connected routes", connectedRoutes);
+
+    const message = connectedRoutes.map(r => `${r.routeId.description} (${r.name})`).join("\n");
+
+    alert(`Connected routes are\n${message}`)
+  });
 }, error => {
   console.error(error);
 })

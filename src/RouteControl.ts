@@ -1,4 +1,4 @@
-import { Route, } from "wsdot-elc";
+import { Route } from "wsdot-elc";
 
 export interface IRouteSegment {
     route: Route,
@@ -6,14 +6,41 @@ export interface IRouteSegment {
     endSrmp: number
 }
 
+export function getRoutesConnectedToRouteSegment(routeSegment: IRouteSegment, routes: Route[]): Route[] {
+    // Get mainline route SR
+    const { route, beginSrmp, endSrmp } = routeSegment;
+
+    const sr = route.routeId.sr;
+
+    const routesInRange = routes.filter(
+        r => r.routeId.sr === sr && (
+            typeof(r.routeId.mainlineIntersectionMP) === "number" && beginSrmp <= r.routeId.mainlineIntersectionMP && r.routeId.mainlineIntersectionMP <= endSrmp)
+    ).sort(sortByRrq);
+
+    return routesInRange;
+}
+
+/**
+ * Sorting function for mainline Route objects only.
+ * @param a First {@type Route} to compare
+ * @param b Second {@type Route} to compare
+ */
 function sort(a: Route, b: Route): number {
+    // Get the route IDs
     const aS = Number(a.routeId.sr);
     const bS = Number(b.routeId.sr);
     return aS === bS ? 0 : aS > bS ? 1 : -1;
 }
 
+function sortByRrq(a: Route, b: Route): number {
+    const [rrqA, rrqB] = [a, b].map(r => r.routeId.mainlineIntersectionMP as number);
+    return rrqA === rrqB ? 0 : rrqA > rrqB ? 1 : -1;
+}
+
 export function createRouteControl(routes: Route[]): HTMLFormElement {
     const form = document.createElement("form");
+
+    form.classList.add("esri-widget")
 
     const label = document.createElement("label");
     label.innerText = "Select a route"
@@ -23,8 +50,10 @@ export function createRouteControl(routes: Route[]): HTMLFormElement {
     form.appendChild(label);
     form.appendChild(routeSelect);
 
+    // Filter the list of routes to just the mainline ones, then sort.
     const mainlineRoutes = routes.filter(r => r.isMainline).sort(sort);
 
+    // Create options for each route.
     for (const r of mainlineRoutes) {
 
         const option = document.createElement("option");
