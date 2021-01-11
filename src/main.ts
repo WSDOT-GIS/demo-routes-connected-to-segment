@@ -2,6 +2,8 @@ import Extent from "esri/geometry/Extent";
 import EsriMap from "esri/Map";
 import MapView from "esri/views/MapView";
 import Search from "esri/widgets/Search";
+import { RouteLocator, Route } from "wsdot-elc";
+import { createRouteControl, IRouteSegment } from "./RouteControl";
 
 const map = new EsriMap({
   basemap: "topo-vector"
@@ -45,3 +47,26 @@ const search = new Search({
 });
 
 view.ui.add(search, "top-right");
+
+const routeLocator = new RouteLocator();
+
+routeLocator.getRouteList(true).then(routes => {
+  console.group("Get Route List");
+  console.debug("routes", routes);
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  const currentRoutes = routes!.Current;
+  console.debug("current routes", currentRoutes);
+
+  const routeControl = createRouteControl(currentRoutes);
+
+  view.ui.add(routeControl, "top-right");
+  
+  console.groupEnd();
+  routeControl.addEventListener("route-selected", (evt: any) => {
+    const customEvent = evt as CustomEvent<IRouteSegment>
+    const {route, beginSrmp, endSrmp} = evt.detail;
+    console.debug(`Selected route is ${route.name} @ ${beginSrmp} - ${endSrmp}`, customEvent);
+  })
+}, error => {
+  console.error(error);
+})
