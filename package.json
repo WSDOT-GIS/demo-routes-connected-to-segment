@@ -1,5 +1,5 @@
 {
-  "name": "arcgis-2d-spa-template",
+  "name": "demo-routes-connected-to-segment",
   "version": "0.0.1",
   "description": "Template for ArcGIS API single page application",
   "main": "index.js",
